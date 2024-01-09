@@ -3,6 +3,8 @@ using FilmesApi.Data.Dtos;
 using FilmesApi.Data;
 using FilmesApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace FilmesApi.Controllers;
 
@@ -31,11 +33,13 @@ public class CinemaController : ControllerBase
     }
 
     [HttpGet]
-    public IEnumerable<ReadCinemaDto> RecuperaCinemas()
+    public IEnumerable<ReadCinemaDto> RecuperaCinemas([FromQuery] int? enderecoId = null)
     {
-        var listaDeCinemasBanco = _context.Cinemas.ToList();
-        var listaDeCinemas = _mapper.Map<List<ReadCinemaDto>>(_context.Cinemas.ToList());
-        return listaDeCinemas;
+        if(enderecoId == null)
+        {
+            return _mapper.Map<List<ReadCinemaDto>>(_context.Cinemas.ToList());
+        }
+        return _mapper.Map<List<ReadCinemaDto>>(_context.Cinemas.FromSqlRaw($"SELECT id, Nome, EnderecoId, FROM cinemas WHERE cinemas.EnderecoId = {enderecoId}").ToList());
     }
 
     [HttpGet("{id}")]
